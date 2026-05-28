@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import users, pets, images, tags, likes, matches, messages
+from app.routers import auth, users, pets, images, tags, likes, matches, messages
 
 app = FastAPI(title="481 Pet Matching API", version="0.1.0")
 
@@ -13,6 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(pets.router)
 app.include_router(images.router)

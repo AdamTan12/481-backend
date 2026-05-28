@@ -1,0 +1,39 @@
+from fastapi import APIRouter, HTTPException, status
+from app.database import get_admin_client
+from app.schemas.auth import RegisterRequest
+from app.schemas.user import UserResponse
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def register(body: RegisterRequest):
+    admin = get_admin_client()
+
+    # Create the auth user — this generates the UUID we'll reuse
+    auth_response = admin.auth.admin.create_user({
+        "email": body.email,
+        "password": body.password,
+        "email_confirm": True,
+    })
+
+    if not auth_response.user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create auth user")
+
+    user_id = auth_response.user.id
+
+    # Insert into public.users with the same ID
+    result = admin.table("users").insert({
+        "id": user_id,
+        "email": body.email,
+        "first_name": body.first_name,
+        "last_name": body.last_name,
+        "password_hash": "",  # auth is handled by Supabase, not stored here
+    }).execute()
+
+    if not result.data:
+        # Roll back the auth user if the DB insert failed
+        admin.auth.admin.delete_user(user_id)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create user profile")
+
+    return result.data[0]

@@ -29,6 +29,26 @@ Authorization: Bearer <access_token>
 
 ---
 
+### Auth
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/auth/register` | Create a new account |
+
+**POST `/auth/register` body:**
+```json
+{
+  "email": "ada@example.com",
+  "password": "supersecret",
+  "first_name": "Ada",
+  "last_name": "Lovelace"
+}
+```
+
+> No `Authorization` header needed. Returns the created user profile.
+
+---
+
 ### Users
 
 | Method | Path | Description |
