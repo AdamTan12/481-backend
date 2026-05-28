@@ -34,6 +34,8 @@ Authorization: Bearer <access_token>
 | Method | Path | Description |
 |---|---|---|
 | POST | `/auth/register` | Create a new account |
+| POST | `/auth/login` | Sign in and get tokens |
+| POST | `/auth/logout` | Invalidate the current session |
 
 **POST `/auth/register` body:**
 ```json
@@ -44,8 +46,27 @@ Authorization: Bearer <access_token>
   "last_name": "Lovelace"
 }
 ```
-
 > No `Authorization` header needed. Returns the created user profile.
+
+**POST `/auth/login` body:**
+```json
+{
+  "email": "ada@example.com",
+  "password": "supersecret"
+}
+```
+> No `Authorization` header needed. Returns tokens to use for all subsequent requests.
+
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "token_type": "bearer"
+}
+```
+
+**POST `/auth/logout`**
+> Requires `Authorization` header. Invalidates the session on Supabase's side. Returns `204 No Content`.
 
 ---
 

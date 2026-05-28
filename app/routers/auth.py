@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, status
-from app.database import get_admin_client
-from app.schemas.auth import RegisterRequest
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.database import get_admin_client, get_supabase
+from app.dependencies import get_current_user
+from app.schemas.auth import RegisterRequest, LoginRequest, LoginResponse
 from app.schemas.user import UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -37,3 +38,24 @@ def register(body: RegisterRequest):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create user profile")
 
     return result.data[0]
+
+
+@router.post("/login", response_model=LoginResponse)
+def login(body: LoginRequest):
+    db = get_supabase()
+    response = db.auth.sign_in_with_password({"email": body.email, "password": body.password})
+
+    if not response.session:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+
+    return LoginResponse(
+        access_token=response.session.access_token,
+        refresh_token=response.session.refresh_token,
+    )
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(current_user: dict = Depends(get_current_user)):
+    db = get_supabase(current_user["token"])
+    db.auth.sign_out()
+
