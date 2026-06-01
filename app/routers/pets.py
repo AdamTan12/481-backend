@@ -36,7 +36,7 @@ def get_my_pets(current_user: dict = Depends(get_current_user)):
 @router.post("", response_model=PetResponse, status_code=status.HTTP_201_CREATED)
 def create_pet(body: PetCreate, current_user: dict = Depends(get_current_user)):
     db = get_supabase(current_user["token"])
-    payload = body.model_dump(exclude_none=True)
+    payload = body.model_dump(exclude_none=True, mode="json")
     payload["owner_id"] = current_user["id"]
     result = db.table("pet_profiles").insert(payload).execute()
     return result.data[0]
@@ -55,7 +55,7 @@ def get_pet(pet_id: str, current_user: dict = Depends(get_current_user)):
 def update_pet(pet_id: str, body: PetUpdate, current_user: dict = Depends(get_current_user)):
     db = get_supabase(current_user["token"])
     _assert_pet_owner(db, pet_id, current_user["id"])
-    updates = body.model_dump(exclude_none=True)
+    updates = body.model_dump(exclude_none=True, mode="json")
     if not updates:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
     result = db.table("pet_profiles").update(updates).eq("id", pet_id).execute()
