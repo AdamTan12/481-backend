@@ -12,16 +12,27 @@ def discover_pets(
     limit: int = Query(20, le=100),
     current_user: dict = Depends(get_current_user),
 ):
-    """Return pets not owned by the current user for the swiping feed."""
     db = get_supabase(current_user["token"])
+
+    my_pets = db.table("pet_profiles").select("id").eq("owner_id", current_user["id"]).execute()
+    my_pet_ids = [p["id"] for p in my_pets.data] if my_pets.data else []
+
+    liked = db.table("pet_likes").select("liked_pet_id").in_("liker_pet_id", my_pet_ids).execute() if my_pet_ids else None
+    liked_ids = [l["liked_pet_id"] for l in liked.data] if liked and liked.data else []
+
     query = (
         db.table("pet_profiles")
         .select("*")
         .neq("owner_id", current_user["id"])
         .limit(limit)
     )
+
+    if liked_ids:
+        query = query.not_.in_("id", liked_ids)
+
     if species:
         query = query.eq("species", species)
+
     result = query.execute()
     return result.data
 
