@@ -1,19 +1,21 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
+from jwt import PyJWKClient
 from app.config import settings
 
 bearer_scheme = HTTPBearer()
-
+jwks_client = PyJWKClient(f"{settings.supabase_url}/auth/v1/.well-known/jwks.json")
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
 ) -> dict:
     token = credentials.credentials
     try:
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
         payload = jwt.decode(
             token,
-            settings.supabase_jwt_secret,
+            signing_key.key,
             algorithms=["ES256", "HS256"],
             options={"verify_aud": False},
         )
