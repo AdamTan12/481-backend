@@ -14,7 +14,7 @@ def get_current_user(
         payload = jwt.decode(
             token,
             settings.supabase_jwt_secret,
-            algorithms=["HS256"],
+            algorithms=["ES256", "HS256"],
             options={"verify_aud": False},
         )
     except jwt.ExpiredSignatureError:
