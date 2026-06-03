@@ -56,3 +56,4 @@ def remove_pet_image(pet_id: str, image_id: str, current_user: dict = Depends(ge
     db = get_supabase(current_user["token"])
     _assert_pet_owner(db, pet_id, current_user["id"])
     db.table("pet_to_image").delete().eq("pet_id", pet_id).eq("image_id", image_id).execute()
+    db.table("images").delete().eq("id", image_id).execute()
