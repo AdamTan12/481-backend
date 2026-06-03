@@ -2,8 +2,8 @@
 
 A REST API for a pet-matching app built with FastAPI and Supabase.
 
-**Base URL (production):** `https://your-railway-url.up.railway.app`  
-**Interactive docs:** `{base_url}/docs`
+**Base URL (production):** `481-backend-production.up.railway.app`  
+**Interactive docs:** `481-backend-production.up.railway.app/docs`
 
 ---
 
@@ -26,47 +26,6 @@ Authorization: Bearer <access_token>
 | Method | Path | Description |
 |---|---|---|
 | GET | `/health` | Check that the server is running |
-
----
-
-### Auth
-
-| Method | Path | Description |
-|---|---|---|
-| POST | `/auth/register` | Create a new account |
-| POST | `/auth/login` | Sign in and get tokens |
-| POST | `/auth/logout` | Invalidate the current session |
-
-**POST `/auth/register` body:**
-```json
-{
-  "email": "ada@example.com",
-  "password": "supersecret",
-  "first_name": "Ada",
-  "last_name": "Lovelace"
-}
-```
-> No `Authorization` header needed. Returns the created user profile.
-
-**POST `/auth/login` body:**
-```json
-{
-  "email": "ada@example.com",
-  "password": "supersecret"
-}
-```
-> No `Authorization` header needed. Returns tokens to use for all subsequent requests.
-
-```json
-{
-  "access_token": "eyJ...",
-  "refresh_token": "eyJ...",
-  "token_type": "bearer"
-}
-```
-
-**POST `/auth/logout`**
-> Requires `Authorization` header. Invalidates the session on Supabase's side. Returns `204 No Content`.
 
 ---
 
